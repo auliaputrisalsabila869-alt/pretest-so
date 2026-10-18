@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Pretest</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:24px;background:#eef1f4;color:#14212b}
+input,button{font:inherit;padding:8px 12px;border:1px solid #9aa7b2;border-radius:6px}button{background:#0f6b6b;color:#fff;border-color:#0f6b6b;cursor:pointer}
+table{border-collapse:collapse;width:100%;margin-top:16px;background:#fff}th,td{padding:8px 12px;border-bottom:1px solid #d6dde3;text-align:left}th{background:#e3e9ee}
+.wrap{overflow-x:auto}</style></head><body>
+<h1>Hasil Pretest</h1>
+<input id="k" type="password" placeholder="Kunci admin"> <button onclick="load()">Tampilkan</button> <button onclick="csv()">Unduh CSV</button>
+<p id="m"></p><div class="wrap"><table id="t"></table></div>
+<script>
+const H=()=>({"x-admin-key":document.getElementById("k").value});
+async function load(){const r=await fetch("/api/admin",{headers:H()});const d=await r.json();
+ if(!r.ok){m.textContent=d.error;return}
+ const done=d.filter(x=>x.submitted_at).length;m.textContent=`${d.length} peserta mulai, ${done} sudah selesai`;
+ t.innerHTML="<tr><th>Nama<th>NPM<th>Kelas<th>Skor<th>Status</tr>"+d.map(x=>`<tr><td>${esc(x.nama)}<td>${esc(x.npm)}<td>${esc(x.kelas)}<td>${x.score??"-"}<td>${x.submitted_at?"Selesai":"Belum kirim"}</tr>`).join("")}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+async function csv(){const r=await fetch("/api/admin?format=csv",{headers:H()});if(!r.ok){m.textContent="Kunci admin salah.";return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(await r.blob());a.download="hasil-pretest.csv";a.click()}
+</script></body></html>
